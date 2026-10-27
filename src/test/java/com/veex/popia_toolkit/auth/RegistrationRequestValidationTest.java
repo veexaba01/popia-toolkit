@@ -4,8 +4,7 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class RegistrationRequestValidationTest
 {
@@ -46,5 +45,14 @@ public class RegistrationRequestValidationTest
         RegistrationRequest request = new RegistrationRequest("Test Clinic", "owner@example.com", "a".repeat(73));
 
         assertFalse(validator.validate(request).isEmpty());
+    }
+
+    @Test void toStringDoesNotRevealPassword()
+    {
+        RegistrationRequest request = new RegistrationRequest("Test Clinic", "owner@example.com", VALID_PASSWORD);
+
+        assertFalse(request.toString().contains(VALID_PASSWORD));
+        assertEquals("RegistrationRequest[organisationName=Test Clinic, email=owner@example.com, password=***]",
+                request.toString());
     }
 }
