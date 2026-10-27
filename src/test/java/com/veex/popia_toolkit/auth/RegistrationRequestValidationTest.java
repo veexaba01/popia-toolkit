@@ -33,4 +33,18 @@ public class RegistrationRequestValidationTest
 
         assertFalse(validator.validate(request).isEmpty());
     }
+
+    @Test void rejectsPasswordShorterThanTwelveCharacters()
+    {
+        RegistrationRequest request = new RegistrationRequest("Test Clinic", "owner@example.com", "short");
+
+        assertFalse(validator.validate(request).isEmpty());
+    }
+
+    @Test void rejectsPasswordLongerThanSeventyTwoCharacters()
+    {
+        RegistrationRequest request = new RegistrationRequest("Test Clinic", "owner@example.com", "a".repeat(73));
+
+        assertFalse(validator.validate(request).isEmpty());
+    }
 }
