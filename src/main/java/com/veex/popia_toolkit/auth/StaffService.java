@@ -2,6 +2,8 @@ package com.veex.popia_toolkit.auth;
 
 import com.veex.popia_toolkit.organisation.Organisation;
 import com.veex.popia_toolkit.organisation.OrganisationRepository;
+
+import java.util.Locale;
 import java.util.UUID;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,13 +25,20 @@ public class StaffService
         this.passwordEncoder = passwordEncoder;
     }
 
-    @Transactional
+        @Transactional
     public AppUser createStaff(UUID organisationId, String email, String rawPassword)
     {
+        String normalisedEmail = email.trim().toLowerCase(Locale.ROOT);
+
+        if (users.findByEmailIgnoreCase(normalisedEmail).isPresent())
+        {
+            throw new EmailAlreadyRegisteredException();
+        }
+
         Organisation organisation = organisations.findById(organisationId)
                 .orElseThrow(() -> new IllegalArgumentException("Organisation not found"));
         String passwordHash = passwordEncoder.encode(rawPassword);
 
-        return users.save(new AppUser(organisation, email, passwordHash, Role.STAFF));
+        return users.save(new AppUser(organisation, normalisedEmail, passwordHash, Role.STAFF));
     }
 }
