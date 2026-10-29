@@ -28,6 +28,10 @@ public class RegistrationController
     @PostMapping("/register")
     public String register(@Valid @ModelAttribute("form") RegistrationForm form, BindingResult result)
     {
+        if (result.hasErrors())
+        {
+            return "register";
+        }
         registrationService.register(
                 new RegistrationRequest(form.getOrganisationName(), form.getEmail(), form.getPassword()));
 

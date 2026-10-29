@@ -9,8 +9,7 @@ import org.springframework.validation.BindingResult;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 public class RegistrationControllerTest
 {
@@ -51,5 +50,20 @@ public class RegistrationControllerTest
         // Assert
         assertEquals("redirect:/login?registered", view, "A successful registration should lead to the login page");
         verify(service).register(any(RegistrationRequest.class));
+    }
+
+    @Test void returnsFormWithoutCallingServiceWhenValidationFails()
+    {
+        // Arrange
+        RegistrationForm form = validForm();
+        BindingResult result = new BeanPropertyBindingResult(form, "form");
+        result.rejectValue("email", "invalid", "Invalid email");
+
+        // Act
+        String view = controller.register(form, result);
+
+        // Assert
+        assertEquals("register", view, "The form should be shown again with its errors");
+        verify(service, never()).register(any(RegistrationRequest.class));
     }
 }
