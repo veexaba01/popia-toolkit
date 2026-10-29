@@ -6,6 +6,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Locale;
+
 @Service
 public class RegistrationService
 {
@@ -25,9 +27,12 @@ public class RegistrationService
     @Transactional
     public AppUser register(RegistrationRequest request)
     {
-        Organisation organisation = organisations.save(new Organisation(request.organisationName()));
+        String email = request.email().trim().toLowerCase(Locale.ROOT);
+        String organisationName = request.organisationName().trim();
+
+        Organisation organisation = organisations.save(new Organisation(organisationName));
         String passwordHash = passwordEncoder.encode(request.password());
 
-        return users.save(new AppUser(organisation, request.email(), passwordHash, Role.ADMIN));
+        return users.save(new AppUser(organisation, email, passwordHash, Role.ADMIN));
     }
 }

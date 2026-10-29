@@ -36,4 +36,28 @@ public class RegistrationServiceTest
         assertNotEquals(PASSWORD, user.getPasswordHash(), "The raw password must never be stored");
         assertTrue(passwordEncoder.matches(PASSWORD, user.getPasswordHash()), "The stored hash should match the password");
     }
+
+    @Test void normalisesEmailToLowercase()
+    {
+        // Arrange
+        RegistrationRequest request = new RegistrationRequest("Test Clinic", "  Owner@Example.COM ", PASSWORD);
+
+        // Act
+        AppUser user = registrationService.register(request);
+
+        // Assert
+        assertEquals("owner@example.com", user.getEmail(), "Emails should be stored trimmed and in lowercase");
+    }
+
+    @Test void trimsOrganisationName()
+    {
+        // Arrange
+        RegistrationRequest request = new RegistrationRequest("  Test Clinic  ", "owner@example.com", PASSWORD);
+
+        // Act
+        AppUser user = registrationService.register(request);
+
+        // Assert
+        assertEquals("Test Clinic", user.getOrganisation().getName(), "Surrounding spaces should be removed");
+    }
 }
