@@ -6,9 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
@@ -59,5 +57,16 @@ public class RegistrationServiceTest
 
         // Assert
         assertEquals("Test Clinic", user.getOrganisation().getName(), "Surrounding spaces should be removed");
+    }
+
+    @Test void rejectsDuplicateEmailRegardlessOfCase()
+    {
+        // Arrange
+        registrationService.register(new RegistrationRequest("Clinic One", "owner@example.com", PASSWORD));
+        RegistrationRequest duplicate = new RegistrationRequest("Clinic Two", "OWNER@example.com", PASSWORD);
+
+        // Act and Assert
+        assertThrows(EmailAlreadyRegisteredException.class, () -> registrationService.register(duplicate),
+                "A second registration with the same email should be rejected");
     }
 }

@@ -30,6 +30,11 @@ public class RegistrationService
         String email = request.email().trim().toLowerCase(Locale.ROOT);
         String organisationName = request.organisationName().trim();
 
+        if (users.findByEmailIgnoreCase(email).isPresent())
+        {
+            throw new EmailAlreadyRegisteredException();
+        }
+
         Organisation organisation = organisations.save(new Organisation(organisationName));
         String passwordHash = passwordEncoder.encode(request.password());
 
