@@ -32,9 +32,16 @@ public class RegistrationController
         {
             return "register";
         }
-        registrationService.register(
-                new RegistrationRequest(form.getOrganisationName(), form.getEmail(), form.getPassword()));
-
+        try
+        {
+            registrationService.register(
+                    new RegistrationRequest(form.getOrganisationName(), form.getEmail(), form.getPassword()));
+        }
+        catch (EmailAlreadyRegisteredException e)
+        {
+            result.reject("registration.failed", "Registration could not be completed with these details.");
+            return "register";
+        }
         return "redirect:/login?registered";
     }
 }

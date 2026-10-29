@@ -66,4 +66,19 @@ public class RegistrationControllerTest
         assertEquals("register", view, "The form should be shown again with its errors");
         verify(service, never()).register(any(RegistrationRequest.class));
     }
+
+    @Test void showsGenericErrorWhenEmailAlreadyRegistered()
+    {
+        // Arrange
+        RegistrationForm form = validForm();
+        BindingResult result = new BeanPropertyBindingResult(form, "form");
+        when(service.register(any(RegistrationRequest.class))).thenThrow(new EmailAlreadyRegisteredException());
+
+        // Act
+        String view = controller.register(form, result);
+
+        // Assert
+        assertEquals("register", view, "The form should be shown again");
+        assertTrue(result.hasGlobalErrors(), "A general error message should be attached to the form");
+    }
 }
