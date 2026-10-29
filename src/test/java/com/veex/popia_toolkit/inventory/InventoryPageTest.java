@@ -70,4 +70,10 @@ public class InventoryPageTest
         assertTrue(page.contains("Patient contacts"), "Clinic A's item should be shown");
         assertFalse(page.contains("Learner records"), "Clinic B's item must never appear for clinic A");
     }
+
+        @Test void userCanOpenTheAddForm() throws Exception
+    {
+        mockMvc.perform(get("/inventory/new").with(user(staffOf(clinicA))))
+                .andExpect(status().isOk());
+    }
 }

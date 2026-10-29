@@ -12,6 +12,7 @@ import org.springframework.ui.Model;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class InventoryControllerTest
 {
@@ -38,5 +39,19 @@ public class InventoryControllerTest
         // Assert
         assertEquals("inventory/list", view, "The list template should be shown");
         assertEquals(List.of(item), model.getAttribute("items"), "Only the organisation's items are passed on");
+    }
+
+    @Test void showNewFormReturnsTheFormViewWithAnEmptyForm()
+    {
+        // Arrange
+        Model model = new ExtendedModelMap();
+
+        // Act
+        String view = controller.showNewForm(model);
+
+        // Assert
+        assertEquals("inventory/form", view);
+        assertTrue(model.containsAttribute("form"), "The template needs a form object to bind to");
+        assertEquals("/inventory", model.getAttribute("action"), "The form should post to the collection");
     }
 }

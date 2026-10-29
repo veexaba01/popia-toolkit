@@ -10,6 +10,8 @@
         
         <p><a th:href="@{/}">Back to home</a></p>
 
+        <p><a th:href="@{/inventory/new}">Add an item</a></p>
+
         <p th:if="${items.isEmpty()}">No items recorded yet.</p>
 
         <table th:if="${!items.isEmpty()}" border="1" cellpadding="6">

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Inventory item - POPIA Toolkit</title>
+</head>
+    <body>
+        <h1 th:text="${heading}"></h1>
+        <p><a th:href="@{/inventory}">Back to the inventory</a></p>
+
+        <form th:action="@{${action}}" th:object="${form}" method="post">
+            <p>
+                <label>Name (what information is it?)
+                    <input type="text" th:field="*{name}">
+                </label>
+                <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+            </p>
+
+            <p>
+                <label>Purpose (why do you hold it?)
+                    <input type="text" th:field="*{purpose}">
+                </label>
+                <span th:if="${#fields.hasErrors('purpose')}" th:errors="*{purpose}"></span>
+            </p>
+
+            <p>
+                <label>Stored in (where is it kept?)
+                    <input type="text" th:field="*{storageLocation}">
+                </label>
+                <span th:if="${#fields.hasErrors('storageLocation')}" th:errors="*{storageLocation}"></span>
+            </p>
+
+            <p>
+                <label>
+                    <input type="checkbox" th:field="*{specialInformation}">
+                    Special personal information (for example health details)
+                </label>
+            </p>
+
+            <button type="submit">Save</button>
+        </form>
+    </body>
+</html>
