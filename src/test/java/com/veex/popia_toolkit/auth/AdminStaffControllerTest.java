@@ -12,6 +12,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.when;
+
 public class AdminStaffControllerTest
 {
     private final StaffService staffService = mock(StaffService.class);
@@ -57,5 +62,36 @@ public class AdminStaffControllerTest
         // Assert
         assertEquals("redirect:/admin/staff?created", view, "A successful creation returns to the page with a notice");
         verify(staffService).createStaff(organisationId, "staff@example.com", "a-long-enough-password");
+    }
+
+        @Test void returnsFormWithoutCallingServiceWhenValidationFails()
+    {
+        // Arrange
+        StaffForm form = validForm();
+        BindingResult result = new BeanPropertyBindingResult(form, "form");
+        result.rejectValue("email", "invalid", "Invalid email");
+
+        // Act
+        String view = controller.create(form, result, adminPrincipal());
+
+        // Assert
+        assertEquals("admin/staff", view, "The form should be shown again with its errors");
+        verify(staffService, never()).createStaff(any(UUID.class), anyString(), anyString());
+    }
+
+    @Test void showsGenericErrorWhenEmailAlreadyRegistered()
+    {
+        // Arrange
+        StaffForm form = validForm();
+        BindingResult result = new BeanPropertyBindingResult(form, "form");
+        when(staffService.createStaff(any(UUID.class), anyString(), anyString()))
+                .thenThrow(new EmailAlreadyRegisteredException());
+
+        // Act
+        String view = controller.create(form, result, adminPrincipal());
+
+        // Assert
+        assertEquals("admin/staff", view, "The form should be shown again");
+        assertTrue(result.hasGlobalErrors(), "A general error message should be attached to the form");
     }
 }

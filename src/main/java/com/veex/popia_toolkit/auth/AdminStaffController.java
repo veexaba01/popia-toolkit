@@ -32,7 +32,20 @@ public class AdminStaffController
                          BindingResult result,
                          @AuthenticationPrincipal AppUserPrincipal principal)
     {
-        staffService.createStaff(principal.getOrganisationId(), form.getEmail(), form.getPassword());
+        if (result.hasErrors())
+        {
+            return "admin/staff";
+        }
+
+        try
+        {
+            staffService.createStaff(principal.getOrganisationId(), form.getEmail(), form.getPassword());
+        }
+        catch (EmailAlreadyRegisteredException e)
+        {
+            result.reject("staff.failed", "Staff member could not be added with these details.");
+            return "admin/staff";
+        }
 
         return "redirect:/admin/staff?created";
     }
