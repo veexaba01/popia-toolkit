@@ -15,6 +15,11 @@ import static org.springframework.security.test.web.servlet.response.SecurityMoc
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+
 @SpringBootTest
 @Transactional
 public class LoginTest
@@ -54,5 +59,12 @@ public class LoginTest
         mockMvc.perform(formLogin().user("nobody@example.com").password(PASSWORD))
                 .andExpect(unauthenticated())
                 .andExpect(redirectedUrl("/login?error"));
+    }
+
+        @Test void loggedInUserSeesTheHomePage() throws Exception
+    {
+        mockMvc.perform(get("/").with(user("owner@example.com").roles("ADMIN")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("home"));
     }
 }
