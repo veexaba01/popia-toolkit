@@ -17,7 +17,7 @@ public class SecurityConfig
         return new BCryptPasswordEncoder(12);
     }
 
-    @Bean
+        @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception
     {
         http
@@ -25,7 +25,10 @@ public class SecurityConfig
                         .requestMatchers("/register", "/login", "/actuator/health").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
-                .formLogin(Customizer.withDefaults());
+                .formLogin(Customizer.withDefaults())
+                .headers(headers -> headers
+                        .contentSecurityPolicy(csp -> csp
+                                .policyDirectives("default-src 'self'; frame-ancestors 'none'")));
 
         return http.build();
     }

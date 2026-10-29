@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 
 @SpringBootTest
 public class SecurityConfigTest
@@ -53,5 +54,18 @@ public class SecurityConfigTest
     {
         mockMvc.perform(get("/admin/staff").with(user("owner@example.com").roles("ADMIN")))
                 .andExpect(status().isOk());
+    }
+
+        @Test void responsesCarryBasicProtectionHeaders() throws Exception
+    {
+        mockMvc.perform(get("/register"))
+                .andExpect(header().string("X-Content-Type-Options", "nosniff"))
+                .andExpect(header().string("X-Frame-Options", "DENY"));
+    }
+
+    @Test void responsesRestrictWhereContentCanLoadFrom() throws Exception
+    {
+        mockMvc.perform(get("/register"))
+                .andExpect(header().string("Content-Security-Policy", "default-src 'self'; frame-ancestors 'none'"));
     }
 }
