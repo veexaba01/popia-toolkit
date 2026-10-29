@@ -3,6 +3,7 @@ package com.veex.popia_toolkit.inventory;
 import com.veex.popia_toolkit.organisation.Organisation;
 import com.veex.popia_toolkit.organisation.OrganisationRepository;
 import java.util.UUID;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,5 +27,18 @@ public class InventoryService
 
         return items.save(new InventoryItem(organisation, details.name(), details.purpose(),
                 details.storageLocation(), details.specialInformation()));
+    }
+
+    @Transactional(readOnly = true)
+    public List<InventoryItem> list(UUID organisationId)
+    {
+        return items.findAllByOrganisationIdOrderByNameAsc(organisationId);
+    }
+
+    @Transactional(readOnly = true)
+    public InventoryItem get(UUID organisationId, UUID itemId)
+    {
+        return items.findByIdAndOrganisationId(itemId, organisationId)
+                .orElseThrow(InventoryItemNotFoundException::new);
     }
 }

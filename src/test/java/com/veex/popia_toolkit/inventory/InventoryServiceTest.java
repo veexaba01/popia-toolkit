@@ -47,4 +47,50 @@ public class InventoryServiceTest
         assertEquals("Practice software", item.getStorageLocation());
         assertFalse(item.isSpecialInformation());
     }
+
+        @Test void listsOnlyTheItemsOfTheGivenOrganisation()
+    {
+        // Arrange
+        service.create(clinicA.getId(), details("Staff records"));
+        service.create(clinicA.getId(), details("Patient contacts"));
+        service.create(clinicB.getId(), details("Learner records"));
+
+        // Act
+        var result = service.list(clinicA.getId());
+
+        // Assert
+        assertEquals(2, result.size(), "Only clinic A's items should be listed");
+        assertEquals("Patient contacts", result.get(0).getName(), "Items are sorted by name");
+    }
+
+    @Test void getsAnItemOfTheSameOrganisation()
+    {
+        // Arrange
+        InventoryItem created = service.create(clinicA.getId(), details("Patient contacts"));
+
+        // Act
+        InventoryItem found = service.get(clinicA.getId(), created.getId());
+
+        // Assert
+        assertEquals(created.getId(), found.getId());
+    }
+
+    @Test void cannotGetAnItemOfAnotherOrganisation()
+    {
+        // Arrange
+        InventoryItem created = service.create(clinicA.getId(), details("Patient contacts"));
+
+        // Act and Assert
+        assertThrows(InventoryItemNotFoundException.class,
+                () -> service.get(clinicB.getId(), created.getId()),
+                "Clinic B must not be able to read clinic A's item, even with the right id");
+    }
+
+    @Test void reportsNotFoundForAnUnknownId()
+    {
+        // Act and Assert
+        assertThrows(InventoryItemNotFoundException.class,
+                () -> service.get(clinicA.getId(), java.util.UUID.randomUUID()),
+                "An unknown id and another organisation's id should look identical");
+    }
 }
