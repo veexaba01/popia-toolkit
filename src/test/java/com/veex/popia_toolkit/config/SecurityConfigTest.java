@@ -12,6 +12,7 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 
 @SpringBootTest
 public class SecurityConfigTest
@@ -40,5 +41,11 @@ public class SecurityConfigTest
     @Test void postWithoutCsrfTokenIsForbidden() throws Exception
     {
         mockMvc.perform(post("/register")).andExpect(status().isForbidden());
+    }
+
+        @Test void staffCannotReachAdminPages() throws Exception
+    {
+        mockMvc.perform(get("/admin/staff").with(user("staff@example.com").roles("STAFF")))
+                .andExpect(status().isForbidden());
     }
 }

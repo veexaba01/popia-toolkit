@@ -23,6 +23,7 @@ public class SecurityConfig
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/register", "/login", "/actuator/health").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .formLogin(Customizer.withDefaults());
 
