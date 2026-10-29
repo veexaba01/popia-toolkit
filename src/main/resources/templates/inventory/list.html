@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>Personal data inventory - POPIA Toolkit</title>
+    </head>
+
+    <body>
+        <h1>Personal data inventory</h1>
+        
+        <p><a th:href="@{/}">Back to home</a></p>
+
+        <p th:if="${items.isEmpty()}">No items recorded yet.</p>
+
+        <table th:if="${!items.isEmpty()}" border="1" cellpadding="6">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Purpose</th>
+                <th>Stored in</th>
+                <th>Special information</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : ${items}">
+                <td th:text="${item.name}"></td>
+                <td th:text="${item.purpose}"></td>
+                <td th:text="${item.storageLocation}"></td>
+                <td th:text="${item.specialInformation} ? 'Yes' : 'No'"></td>
+            </tr>
+            </tbody>
+        </table>
+    </body>
+</html>
