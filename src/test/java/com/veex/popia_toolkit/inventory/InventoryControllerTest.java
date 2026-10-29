@@ -14,6 +14,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
+
 public class InventoryControllerTest
 {
     private final InventoryService service = mock(InventoryService.class);
@@ -53,5 +59,46 @@ public class InventoryControllerTest
         assertEquals("inventory/form", view);
         assertTrue(model.containsAttribute("form"), "The template needs a form object to bind to");
         assertEquals("/inventory", model.getAttribute("action"), "The form should post to the collection");
+    }
+
+    private InventoryItemForm validForm()
+    {
+        InventoryItemForm form = new InventoryItemForm();
+        form.setName("Patient contacts");
+        form.setPurpose("Booking appointments");
+        form.setStorageLocation("Practice software");
+        form.setSpecialInformation(false);
+        return form;
+    }
+
+    @Test void createsTheItemInTheOrganisationOfTheLoggedInUser()
+    {
+        // Arrange
+        InventoryItemForm form = validForm();
+        BindingResult result = new BeanPropertyBindingResult(form, "form");
+
+        // Act
+        String view = controller.create(form, result, staffPrincipal(), new ExtendedModelMap());
+
+        // Assert
+        assertEquals("redirect:/inventory?created", view);
+        verify(service).create(organisationId, form.toDetails());
+    }
+
+    @Test void returnsTheFormWithoutSavingWhenValidationFails()
+    {
+        // Arrange
+        InventoryItemForm form = validForm();
+        BindingResult result = new BeanPropertyBindingResult(form, "form");
+        result.rejectValue("name", "blank", "Name is required");
+        Model model = new ExtendedModelMap();
+
+        // Act
+        String view = controller.create(form, result, staffPrincipal(), model);
+
+        // Assert
+        assertEquals("inventory/form", view, "The form should be shown again with its errors");
+        assertEquals("/inventory", model.getAttribute("action"), "The form must still post to the right place");
+        verify(service, never()).create(any(UUID.class), any(InventoryItemDetails.class));
     }
 }

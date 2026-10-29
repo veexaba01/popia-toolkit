@@ -14,6 +14,8 @@
 
         <p th:if="${items.isEmpty()}">No items recorded yet.</p>
 
+        <p th:if="${param.created}"><strong>Item saved.</strong></p>
+
         <table th:if="${!items.isEmpty()}" border="1" cellpadding="6">
             <thead>
             <tr>

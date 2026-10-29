@@ -5,7 +5,11 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.GetMapping;
+
+import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
 public class InventoryController
@@ -36,5 +40,22 @@ public class InventoryController
     {
         model.addAttribute("heading", "Add an inventory item");
         model.addAttribute("action", "/inventory");
+    }
+
+    @PostMapping("/inventory")
+    public String create(@Valid @ModelAttribute("form") InventoryItemForm form,
+                         BindingResult result,
+                         @AuthenticationPrincipal AppUserPrincipal principal,
+                         Model model)
+    {
+        if (result.hasErrors())
+        {
+            prepareForm(model);
+            return "inventory/form";
+        }
+
+        inventoryService.create(principal.getOrganisationId(), form.toDetails());
+
+        return "redirect:/inventory?created";
     }
 }
