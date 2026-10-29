@@ -7,8 +7,13 @@
 
     <body>
         <h1>POPIA Toolkit</h1>
+
         <p>Logged in as <strong th:text="${email}"></strong>
             (<span th:each="role : ${roles}" th:text="${role}"></span>)</p>
+
+        <p th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
+            <a th:href="@{/admin/staff}">Add a staff member</a>
+        </p>
 
         <form th:action="@{/logout}" method="post">
             <button type="submit">Log out</button>
