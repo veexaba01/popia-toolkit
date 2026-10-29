@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>Register - POPIA Toolkit</title>
+    </head>
+
+    <body>
+        <h1>Register your organisation</h1>
+
+        <form th:action="@{/register}" th:object="${form}" method="post">
+            <ul th:if="${#fields.hasGlobalErrors()}">
+                <li th:each="err : ${#fields.globalErrors()}" th:text="${err}"></li>
+            </ul>
+
+            <p>
+                <label>Organisation name
+                    <input type="text" th:field="*{organisationName}">
+                </label>
+                <span th:if="${#fields.hasErrors('organisationName')}" th:errors="*{organisationName}"></span>
+            </p>
+
+            <p>
+                <label>Email
+                    <input type="email" th:field="*{email}">
+                </label>
+                <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+            </p>
+
+            <p>
+                <label>Password (12 to 72 characters)
+                    <input type="password" th:field="*{password}" autocomplete="new-password">
+                </label>
+                <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></span>
+            </p>
+
+            <button type="submit">Register</button>
+        </form>
+    </body>
+</html>
