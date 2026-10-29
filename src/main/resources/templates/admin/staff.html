@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>Add staff - POPIA Toolkit</title>
+    </head>
+
+    <body>
+        <h1>Add a staff member</h1>
+        <p><a th:href="@{/}">Back to home</a></p>
+
+        <p th:if="${param.created}"><strong>Staff member added.</strong></p>
+
+        <form th:action="@{/admin/staff}" th:object="${form}" method="post">
+            <ul th:if="${#fields.hasGlobalErrors()}">
+                <li th:each="err : ${#fields.globalErrors()}" th:text="${err}"></li>
+            </ul>
+
+            <p>
+                <label>Email
+                    <input type="email" th:field="*{email}">
+                </label>
+                <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+            </p>
+
+            <p>
+                <label>Temporary password (12 to 72 characters)
+                    <input type="password" th:field="*{password}" autocomplete="new-password">
+                </label>
+                <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></span>
+            </p>
+
+            <button type="submit">Add staff member</button>
+        </form>
+    </body>
+</html>

@@ -43,9 +43,15 @@ public class SecurityConfigTest
         mockMvc.perform(post("/register")).andExpect(status().isForbidden());
     }
 
-        @Test void staffCannotReachAdminPages() throws Exception
+    @Test void staffCannotReachAdminPages() throws Exception
     {
         mockMvc.perform(get("/admin/staff").with(user("staff@example.com").roles("STAFF")))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test void adminCanReachTheStaffPage() throws Exception
+    {
+        mockMvc.perform(get("/admin/staff").with(user("owner@example.com").roles("ADMIN")))
+                .andExpect(status().isOk());
     }
 }
