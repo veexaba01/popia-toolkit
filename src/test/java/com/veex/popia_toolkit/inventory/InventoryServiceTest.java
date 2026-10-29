@@ -2,6 +2,7 @@ package com.veex.popia_toolkit.inventory;
 
 import com.veex.popia_toolkit.organisation.Organisation;
 import com.veex.popia_toolkit.organisation.OrganisationRepository;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,11 @@ public class InventoryServiceTest
     private InventoryItemDetails details(String name)
     {
         return new InventoryItemDetails(name, "Booking appointments", "Practice software", false);
+    }
+
+    private InventoryItem getAsClinicA(InventoryItem item)
+    {
+        return service.get(clinicA.getId(), item.getId());
     }
 
     @Test void createsAnItemInTheGivenOrganisation()
@@ -69,7 +75,7 @@ public class InventoryServiceTest
         InventoryItem created = service.create(clinicA.getId(), details("Patient contacts"));
 
         // Act
-        InventoryItem found = service.get(clinicA.getId(), created.getId());
+        InventoryItem found = getAsClinicA(created);
 
         // Assert
         assertEquals(created.getId(), found.getId());
@@ -90,7 +96,7 @@ public class InventoryServiceTest
     {
         // Act and Assert
         assertThrows(InventoryItemNotFoundException.class,
-                () -> service.get(clinicA.getId(), java.util.UUID.randomUUID()),
+                () -> service.get(clinicA.getId(), UUID.randomUUID()),
                 "An unknown id and another organisation's id should look identical");
     }
 
@@ -120,7 +126,34 @@ public class InventoryServiceTest
         assertThrows(InventoryItemNotFoundException.class,
                 () -> service.update(clinicB.getId(), created.getId(), changes),
                 "Clinic B must not be able to change clinic A's item");
-        assertEquals("Patient contacts", service.get(clinicA.getId(), created.getId()).getName(),
+        assertEquals("Patient contacts", getAsClinicA(created).getName(),
                 "The original item must be unchanged");
+    }
+
+    @Test void deletesAnItemOfTheSameOrganisation()
+    {
+        // Arrange
+        InventoryItem created = service.create(clinicA.getId(), details("Patient contacts"));
+
+        // Act
+        service.delete(clinicA.getId(), created.getId());
+
+        // Assert
+        assertThrows(InventoryItemNotFoundException.class,
+                () -> getAsClinicA(created),
+                "The item should be gone after deletion");
+    }
+
+    @Test void cannotDeleteAnItemOfAnotherOrganisation()
+    {
+        // Arrange
+        InventoryItem created = service.create(clinicA.getId(), details("Patient contacts"));
+
+        // Act and Assert
+        assertThrows(InventoryItemNotFoundException.class,
+                () -> service.delete(clinicB.getId(), created.getId()),
+                "Clinic B must not be able to delete clinic A's item");
+        assertEquals(created.getId(), getAsClinicA(created).getId(),
+                "The item must still exist for its owner");
     }
 }

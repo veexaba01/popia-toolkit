@@ -50,4 +50,11 @@ public class InventoryService
 
         return items.save(item);
     }
+
+        @Transactional
+    public void delete(UUID organisationId, UUID itemId)
+    {
+        InventoryItem item = get(organisationId, itemId);
+        items.delete(item);
+    }
 }
