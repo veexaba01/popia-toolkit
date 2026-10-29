@@ -48,7 +48,7 @@ public class InventoryServiceTest
         assertFalse(item.isSpecialInformation());
     }
 
-        @Test void listsOnlyTheItemsOfTheGivenOrganisation()
+    @Test void listsOnlyTheItemsOfTheGivenOrganisation()
     {
         // Arrange
         service.create(clinicA.getId(), details("Staff records"));
@@ -92,5 +92,35 @@ public class InventoryServiceTest
         assertThrows(InventoryItemNotFoundException.class,
                 () -> service.get(clinicA.getId(), java.util.UUID.randomUUID()),
                 "An unknown id and another organisation's id should look identical");
+    }
+
+    @Test void updatesAnItemOfTheSameOrganisation()
+    {
+        // Arrange
+        InventoryItem created = service.create(clinicA.getId(), details("Patient contacts"));
+        InventoryItemDetails changes = new InventoryItemDetails("Patient records", "Treatment", "Locked cabinet", true);
+
+        // Act
+        InventoryItem updated = service.update(clinicA.getId(), created.getId(), changes);
+
+        // Assert
+        assertEquals("Patient records", updated.getName());
+        assertEquals("Treatment", updated.getPurpose());
+        assertEquals("Locked cabinet", updated.getStorageLocation());
+        assertTrue(updated.isSpecialInformation());
+    }
+
+    @Test void cannotUpdateAnItemOfAnotherOrganisation()
+    {
+        // Arrange
+        InventoryItem created = service.create(clinicA.getId(), details("Patient contacts"));
+        InventoryItemDetails changes = new InventoryItemDetails("Hacked", "Hacked", "Hacked", true);
+
+        // Act and Assert
+        assertThrows(InventoryItemNotFoundException.class,
+                () -> service.update(clinicB.getId(), created.getId(), changes),
+                "Clinic B must not be able to change clinic A's item");
+        assertEquals("Patient contacts", service.get(clinicA.getId(), created.getId()).getName(),
+                "The original item must be unchanged");
     }
 }

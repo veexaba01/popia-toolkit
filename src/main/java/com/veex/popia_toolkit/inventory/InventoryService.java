@@ -41,4 +41,13 @@ public class InventoryService
         return items.findByIdAndOrganisationId(itemId, organisationId)
                 .orElseThrow(InventoryItemNotFoundException::new);
     }
+
+    @Transactional
+    public InventoryItem update(UUID organisationId, UUID itemId, InventoryItemDetails details)
+    {
+        InventoryItem item = get(organisationId, itemId);
+        item.update(details.name(), details.purpose(), details.storageLocation(), details.specialInformation());
+
+        return items.save(item);
+    }
 }

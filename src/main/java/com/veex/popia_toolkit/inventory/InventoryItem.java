@@ -51,4 +51,12 @@ public class InventoryItem
     public String getStorageLocation() { return storageLocation; }
     public boolean isSpecialInformation() { return specialInformation; }
     public Instant getCreatedAt() { return createdAt; }
+
+    public void update(String name, String purpose, String storageLocation, boolean specialInformation)
+    {
+        this.name = name;
+        this.purpose = purpose;
+        this.storageLocation = storageLocation;
+        this.specialInformation = specialInformation;
+    }
 }
