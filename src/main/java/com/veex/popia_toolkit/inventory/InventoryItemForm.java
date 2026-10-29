@@ -32,4 +32,14 @@ public class InventoryItemForm
     {
         return new InventoryItemDetails(name.trim(), purpose.trim(), storageLocation.trim(), specialInformation);
     }
+
+    public static InventoryItemForm from(InventoryItem item)
+    {
+        InventoryItemForm form = new InventoryItemForm();
+        form.setName(item.getName());
+        form.setPurpose(item.getPurpose());
+        form.setStorageLocation(item.getStorageLocation());
+        form.setSpecialInformation(item.isSpecialInformation());
+        return form;
+    }
 }

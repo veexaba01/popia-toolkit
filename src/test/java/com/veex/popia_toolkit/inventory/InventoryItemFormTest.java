@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.veex.popia_toolkit.organisation.Organisation;
+
 public class InventoryItemFormTest
 {
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
@@ -59,5 +61,21 @@ public class InventoryItemFormTest
         // Assert
         assertEquals(new InventoryItemDetails("Patient contacts", "Booking appointments", "Practice software", true),
                 details, "Surrounding spaces should be removed");
+    }
+
+    @Test void fillsItselfFromAnExistingItem()
+    {
+        // Arrange
+        InventoryItem item = new InventoryItem(new Organisation("Clinic A"), "Patient contacts",
+                "Booking appointments", "Practice software", true);
+
+        // Act
+        InventoryItemForm form = InventoryItemForm.from(item);
+
+        // Assert
+        assertEquals("Patient contacts", form.getName());
+        assertEquals("Booking appointments", form.getPurpose());
+        assertEquals("Practice software", form.getStorageLocation());
+        assertTrue(form.isSpecialInformation());
     }
 }
