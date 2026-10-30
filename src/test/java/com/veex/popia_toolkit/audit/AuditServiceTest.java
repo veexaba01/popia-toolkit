@@ -66,4 +66,13 @@ public class AuditServiceTest
                 () -> service.record(java.util.UUID.randomUUID(), "a@example.com", AuditAction.LOGIN_SUCCESS, null),
                 "An event must always belong to a real organisation");
     }
+
+    @Test void recordsAPasswordChangeEvent()
+    {
+        // Act
+        service.record(clinicA.getId(), "staff@example.com", AuditAction.PASSWORD_CHANGED, null);
+
+        // Assert
+        assertEquals(AuditAction.PASSWORD_CHANGED, service.recent(clinicA.getId()).get(0).getAction());
+    }
 }
