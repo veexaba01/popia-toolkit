@@ -1,5 +1,7 @@
 package com.veex.popia_toolkit.auth;
 
+import com.veex.popia_toolkit.audit.AuditAction;
+import com.veex.popia_toolkit.audit.AuditService;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.ui.ExtendedModelMap;
@@ -15,16 +17,19 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 public class PasswordControllerTest
 {
     private final PasswordChangeService service = mock(PasswordChangeService.class);
-    private final PasswordController controller = new PasswordController(service);
+    private final AuditService audit = mock(AuditService.class);
+    private final PasswordController controller = new PasswordController(service, audit);
     private final UUID userId = UUID.randomUUID();
+    private final UUID organisationId = UUID.randomUUID();
 
     private AppUserPrincipal principal()
     {
-        return new AppUserPrincipal(userId, UUID.randomUUID(), "staff@example.com", "hash", Role.STAFF, true);
+        return new AppUserPrincipal(userId, organisationId, "staff@example.com", "hash", Role.STAFF, true);
     }
 
     private ChangePasswordForm validForm()
@@ -61,6 +66,7 @@ public class PasswordControllerTest
         // Assert
         assertEquals("redirect:/account/password?changed", view);
         verify(service).changePassword(userId, "old-password-1234", "new-password-5678");
+        verify(audit).record(organisationId, "staff@example.com", AuditAction.PASSWORD_CHANGED, null);
     }
 
     @Test void returnsTheFormWithoutChangingAnythingWhenValidationFails()
@@ -76,6 +82,7 @@ public class PasswordControllerTest
         // Assert
         assertEquals("account/password", view);
         verify(service, never()).changePassword(any(UUID.class), anyString(), anyString());
+        verifyNoInteractions(audit);
     }
 
     @Test void showsAnErrorOnTheCurrentPasswordWhenItIsWrong()
@@ -92,6 +99,7 @@ public class PasswordControllerTest
         // Assert
         assertEquals("account/password", view);
         assertTrue(result.hasFieldErrors("currentPassword"), "The error belongs on the current password field");
+        verifyNoInteractions(audit);
     }
 
     @Test void rejectsNewPasswordsThatDoNotMatch()
@@ -108,6 +116,7 @@ public class PasswordControllerTest
         assertEquals("account/password", view);
         assertTrue(result.hasFieldErrors("confirmPassword"), "The mismatch belongs on the confirmation field");
         verify(service, never()).changePassword(any(UUID.class), anyString(), anyString());
+        verifyNoInteractions(audit);
     }
 
     @Test void rejectsANewPasswordThatIsTheSameAsTheCurrentOne()
@@ -125,5 +134,6 @@ public class PasswordControllerTest
         assertEquals("account/password", view);
         assertTrue(result.hasFieldErrors("newPassword"), "The error belongs on the new password field");
         verify(service, never()).changePassword(any(UUID.class), anyString(), anyString());
+        verifyNoInteractions(audit);
     }
 }

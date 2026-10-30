@@ -1,5 +1,7 @@
 package com.veex.popia_toolkit.auth;
 
+import com.veex.popia_toolkit.audit.AuditAction;
+import com.veex.popia_toolkit.audit.AuditService;
 import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -13,10 +15,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 public class PasswordController
 {
     private final PasswordChangeService passwordChangeService;
+    private final AuditService auditService;
 
-    public PasswordController(PasswordChangeService passwordChangeService)
+    public PasswordController(PasswordChangeService passwordChangeService, AuditService auditService)
     {
         this.passwordChangeService = passwordChangeService;
+        this.auditService = auditService;
     }
 
     @GetMapping("/account/password")
@@ -58,6 +62,9 @@ public class PasswordController
             result.rejectValue("currentPassword", "wrong", "The current password is not correct.");
             return "account/password";
         }
+
+        auditService.record(principal.getOrganisationId(), principal.getUsername(),
+                AuditAction.PASSWORD_CHANGED, null);
 
         return "redirect:/account/password?changed";
     }
