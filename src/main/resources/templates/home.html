@@ -13,6 +13,7 @@
 
         <p th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
             <a th:href="@{/admin/staff}">Add a staff member</a>
+            <a th:href="@{/admin/audit}">Audit log</a>
         </p>
 
         <p><a th:href="@{/inventory}">Personal data inventory</a></p>
