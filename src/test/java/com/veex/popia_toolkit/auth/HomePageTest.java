@@ -44,4 +44,12 @@ public class HomePageTest
 
         assertFalse(page.contains("/admin/"), "Staff should not be shown admin links");
     }
+
+    @Test void everyoneSeesTheChangePasswordLink() throws Exception
+    {
+        String page = mockMvc.perform(get("/").with(user("staff@example.com").roles("STAFF")))
+                .andReturn().getResponse().getContentAsString();
+
+        assertTrue(page.contains("/account/password"), "Staff should be able to reach the change password page");
+    }
 }
