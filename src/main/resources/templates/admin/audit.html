@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>Audit log - POPIA Toolkit</title>
+    </head>
+
+    <body>
+        <h1>Audit log</h1>
+        <p><a th:href="@{/}">Back to home</a></p>
+        <p>The 100 most recent events for your organisation, newest first.</p>
+
+        <p th:if="${events.isEmpty()}">No events recorded yet.</p>
+
+        <table th:if="${!events.isEmpty()}" border="1" cellpadding="6">
+            <thead>
+            <tr>
+                <th>When (UTC)</th>
+                <th>Who</th>
+                <th>What</th>
+                <th>Detail</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="event : ${events}">
+                <td th:text="${event.occurredAt}"></td>
+                <td th:text="${event.actorEmail}"></td>
+                <td th:text="${event.action}"></td>
+                <td th:text="${event.detail}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </body>
+</html>
