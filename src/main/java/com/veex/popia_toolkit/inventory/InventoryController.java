@@ -1,5 +1,7 @@
 package com.veex.popia_toolkit.inventory;
 
+import com.veex.popia_toolkit.audit.AuditAction;
+import com.veex.popia_toolkit.audit.AuditService;
 import com.veex.popia_toolkit.auth.AppUserPrincipal;
 import jakarta.validation.Valid;
 import java.util.UUID;
@@ -16,10 +18,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 public class InventoryController
 {
     private final InventoryService inventoryService;
+    private final AuditService auditService;
 
-    public InventoryController(InventoryService inventoryService)
+    public InventoryController(InventoryService inventoryService, AuditService auditService)
     {
         this.inventoryService = inventoryService;
+        this.auditService = auditService;
     }
 
     @GetMapping("/inventory")
@@ -50,6 +54,8 @@ public class InventoryController
         }
 
         inventoryService.create(principal.getOrganisationId(), form.toDetails());
+        auditService.record(principal.getOrganisationId(), principal.getUsername(),
+                AuditAction.INVENTORY_CREATED, "Item: " + form.getName().trim());
 
         return "redirect:/inventory?created";
     }
@@ -66,12 +72,6 @@ public class InventoryController
         return "inventory/form";
     }
 
-    private void prepareForm(Model model, String heading, String action)
-    {
-        model.addAttribute("heading", heading);
-        model.addAttribute("action", action);
-    }
-
     @PostMapping("/inventory/{id}")
     public String update(@PathVariable UUID id,
                          @Valid @ModelAttribute("form") InventoryItemForm form,
@@ -86,6 +86,8 @@ public class InventoryController
         }
 
         inventoryService.update(principal.getOrganisationId(), id, form.toDetails());
+        auditService.record(principal.getOrganisationId(), principal.getUsername(),
+                AuditAction.INVENTORY_UPDATED, "Item: " + form.getName().trim());
 
         return "redirect:/inventory?updated";
     }
@@ -94,7 +96,15 @@ public class InventoryController
     public String delete(@PathVariable UUID id, @AuthenticationPrincipal AppUserPrincipal principal)
     {
         inventoryService.delete(principal.getOrganisationId(), id);
+        auditService.record(principal.getOrganisationId(), principal.getUsername(),
+                AuditAction.INVENTORY_DELETED, "Item " + id);
 
         return "redirect:/inventory?deleted";
+    }
+
+    private void prepareForm(Model model, String heading, String action)
+    {
+        model.addAttribute("heading", heading);
+        model.addAttribute("action", action);
     }
 }

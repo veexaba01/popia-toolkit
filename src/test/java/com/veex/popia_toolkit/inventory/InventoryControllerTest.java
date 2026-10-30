@@ -1,5 +1,7 @@
 package com.veex.popia_toolkit.inventory;
 
+import com.veex.popia_toolkit.audit.AuditAction;
+import com.veex.popia_toolkit.audit.AuditService;
 import com.veex.popia_toolkit.auth.AppUserPrincipal;
 import com.veex.popia_toolkit.auth.Role;
 import com.veex.popia_toolkit.organisation.Organisation;
@@ -17,12 +19,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 public class InventoryControllerTest
 {
     private final InventoryService service = mock(InventoryService.class);
-    private final InventoryController controller = new InventoryController(service);
+    private final AuditService audit = mock(AuditService.class);
+    private final InventoryController controller = new InventoryController(service, audit);
     private final UUID organisationId = UUID.randomUUID();
 
     private AppUserPrincipal staffPrincipal()
@@ -82,6 +86,8 @@ public class InventoryControllerTest
         // Assert
         assertEquals("redirect:/inventory?created", view);
         verify(service).create(organisationId, form.toDetails());
+        verify(audit).record(organisationId, "staff@example.com", AuditAction.INVENTORY_CREATED,
+                "Item: Patient contacts");
     }
 
     @Test void returnsTheFormWithoutSavingWhenValidationFails()
@@ -99,6 +105,7 @@ public class InventoryControllerTest
         assertEquals("inventory/form", view, "The form should be shown again with its errors");
         assertEquals("/inventory", model.getAttribute("action"), "The form must still post to the right place");
         verify(service, never()).create(any(UUID.class), any(InventoryItemDetails.class));
+        verifyNoInteractions(audit);
     }
 
     @Test void showEditFormFillsTheFormFromTheItemOfTheUsersOrganisation()
@@ -133,6 +140,8 @@ public class InventoryControllerTest
         // Assert
         assertEquals("redirect:/inventory?updated", view);
         verify(service).update(organisationId, itemId, form.toDetails());
+        verify(audit).record(organisationId, "staff@example.com", AuditAction.INVENTORY_UPDATED,
+                "Item: Patient contacts");
     }
 
     @Test void returnsTheEditFormWithoutUpdatingWhenValidationFails()
@@ -151,6 +160,7 @@ public class InventoryControllerTest
         assertEquals("inventory/form", view);
         assertEquals("/inventory/" + itemId, model.getAttribute("action"));
         verify(service, never()).update(any(UUID.class), any(UUID.class), any(InventoryItemDetails.class));
+        verifyNoInteractions(audit);
     }
 
     @Test void deletesTheItemInTheOrganisationOfTheLoggedInUser()
@@ -164,5 +174,6 @@ public class InventoryControllerTest
         // Assert
         assertEquals("redirect:/inventory?deleted", view);
         verify(service).delete(organisationId, itemId);
+        verify(audit).record(organisationId, "staff@example.com", AuditAction.INVENTORY_DELETED, "Item " + itemId);
     }
 }
