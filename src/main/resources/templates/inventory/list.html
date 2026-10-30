@@ -16,6 +16,10 @@
 
         <p th:if="${param.created}"><strong>Item saved.</strong></p>
 
+        <p th:if="${param.updated}"><strong>Item updated.</strong></p>
+
+        <p th:if="${param.deleted}"><strong>Item deleted.</strong></p>
+
         <table th:if="${!items.isEmpty()}" border="1" cellpadding="6">
             <thead>
             <tr>
@@ -23,6 +27,7 @@
                 <th>Purpose</th>
                 <th>Stored in</th>
                 <th>Special information</th>
+                <th>Actions</th>
             </tr>
             </thead>
             <tbody>
@@ -31,6 +36,13 @@
                 <td th:text="${item.purpose}"></td>
                 <td th:text="${item.storageLocation}"></td>
                 <td th:text="${item.specialInformation} ? 'Yes' : 'No'"></td>
+                <td>
+                    <a th:href="@{/inventory/{id}/edit(id=${item.id})}">Edit</a>
+                    <form th:if="${#authorization.expression('hasRole(''ADMIN'')')}"
+                            th:action="@{/inventory/{id}/delete(id=${item.id})}" method="post">
+                        <button type="submit">Delete</button>
+                    </form>
+                </td>
             </tr>
             </tbody>
         </table>

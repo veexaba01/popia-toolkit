@@ -151,4 +151,20 @@ public class InventoryPageTest
 
         assertNotNull(service.get(clinicB.getId(), itemB.getId()), "The other organisation's item must remain");
     }
+
+    @Test void adminSeesTheDeleteButton() throws Exception
+    {
+        String page = mockMvc.perform(get("/inventory").with(user(adminOf(clinicA))))
+                .andReturn().getResponse().getContentAsString();
+
+        assertTrue(page.contains("/delete"), "An admin should see the delete button");
+    }
+
+    @Test void staffDoNotSeeTheDeleteButton() throws Exception
+    {
+        String page = mockMvc.perform(get("/inventory").with(user(staffOf(clinicA))))
+                .andReturn().getResponse().getContentAsString();
+
+        assertFalse(page.contains("/delete"), "Staff should not be shown a delete button");
+    }
 }
