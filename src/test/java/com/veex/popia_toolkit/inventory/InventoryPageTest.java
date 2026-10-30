@@ -84,4 +84,16 @@ public class InventoryPageTest
         mockMvc.perform(get("/inventory/" + itemA.getId() + "/edit").with(user(staffOf(clinicA))))
                 .andExpect(status().isOk());
     }
+
+        @Test void unknownItemGivesNotFound() throws Exception
+    {
+        mockMvc.perform(get("/inventory/" + UUID.randomUUID() + "/edit").with(user(staffOf(clinicA))))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test void anotherOrganisationsItemGivesNotFound() throws Exception
+    {
+        mockMvc.perform(get("/inventory/" + itemB.getId() + "/edit").with(user(staffOf(clinicA))))
+                .andExpect(status().isNotFound());
+    }
 }
