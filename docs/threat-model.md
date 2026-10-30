@@ -69,7 +69,7 @@ Each table lists the threat, what the project already does about it, what is mis
 |---|---|---|---|---|
 | Elevation of privilege | Staff reaching admin pages | `/admin/**` requires the ADMIN role, tests for staff getting 403 | None known | Browse to admin URLs directly as staff |
 | Elevation of privilege | Adding a role or organisation field to a form post | Forms have no such fields, role is fixed to STAFF, organisation comes from the login | None known | Add extra parameters in Burp and see if they are ever used |
-| Spoofing | Admin knows staff passwords | Passwords are stored hashed | The admin sets the initial password and there is no way for staff to change it | Check whether any password change exists (it does not) |
+| Spoofing | Admin knows a staff member's initial password | Every user can change their own password after confirming the current one, the change is audited | Existing sessions of that user stay valid after a change, and a stolen session can be used to guess the current password through this form without a limit | Change a password in one browser and check whether a second session still works, then try repeated wrong current passwords |
 | Denial of service | Removing a compromised account | A disabled flag exists in the database | No screen to disable or remove staff | Review as a missing control |
 
 ### Inventory and organisation isolation
@@ -112,7 +112,7 @@ Each table lists the threat, what the project already does about it, what is mis
 ## 6. Known gaps, in priority order
 
 1. No way for staff to change a password, and admins set initial passwords
-2. No way to disable or remove a staff account
+2. Changing a password does not end the user's other sessions, and the change form has no attempt limit
 3. Registration is open to anyone, with no email verification or rate limit
 4. Registration failures are still partly distinguishable
 5. Failed logins for unknown emails are not recorded
