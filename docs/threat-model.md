@@ -49,7 +49,7 @@ Each table lists the threat, what the project already does about it, what is mis
 
 | STRIDE | Threat | In place today | Gap | Test in the pentest |
 |---|---|---|---|---|
-| Spoofing | Guessing or reusing passwords | BCrypt hashing with salt, 12 to 72 character passwords | No lockout and no rate limiting | Run many login attempts with ffuf or Burp Intruder and see whether anything slows or blocks them |
+| Spoofing | Guessing or reusing passwords | BCrypt hashing with salt, 12 to 72 character passwords, five failed logins per username in 15 minutes blocks further attempts | The limit is per username and held in memory, so it resets on restart, and it lets someone lock a known victim out for 15 minutes | Run many login attempts and confirm the block starts after five, looks identical to a normal failure, and lifts after the window |
 | Information disclosure | Finding out which emails have accounts | Login returns the same result for a wrong password and an unknown email | Registration shows a generic failure for a duplicate email, but it is still distinguishable from other errors, and timing may differ | Compare responses and timings for new and existing emails |
 | Denial of service | Mass registration creating many organisations | Input validation | No rate limit, no email verification | Script bulk registrations |
 | Spoofing | Weak passwords | Minimum length of 12 | No check against known breached passwords | Try common long passwords |
@@ -111,15 +111,15 @@ Each table lists the threat, what the project already does about it, what is mis
 
 ## 6. Known gaps, in priority order
 
-1. No rate limiting or account lockout on login
-2. No way for staff to change a password, and admins set initial passwords
-3. No way to disable or remove a staff account
-4. Registration is open to anyone, with no email verification or rate limit
-5. Registration failures are still partly distinguishable
-6. Failed logins for unknown emails are not recorded
-7. No pagination on the inventory list
-8. The audit log lives in the same database as everything else
-9. The Secure cookie flag depends on running with the production profile
+1. No way for staff to change a password, and admins set initial passwords
+2. No way to disable or remove a staff account
+3. Registration is open to anyone, with no email verification or rate limit
+4. Registration failures are still partly distinguishable
+5. Failed logins for unknown emails are not recorded
+6. No pagination on the inventory list
+7. The audit log lives in the same database as everything else
+8. The Secure cookie flag depends on running with the production profile
+9. Login rate limiting is per username and in memory, so it resets on restart and can be used to lock a known account out temporarily
 
 ## 7. Assumptions
 
