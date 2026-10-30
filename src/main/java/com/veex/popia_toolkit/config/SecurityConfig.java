@@ -1,5 +1,7 @@
 package com.veex.popia_toolkit.config;
 
+import com.veex.popia_toolkit.auth.LoginAttemptTracker;
+import com.veex.popia_toolkit.auth.LoginRateLimitFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -8,6 +10,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 public class SecurityConfig
@@ -18,8 +21,9 @@ public class SecurityConfig
         return new BCryptPasswordEncoder(12);
     }
 
-        @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, LoginAttemptTracker loginAttempts)
+            throws Exception
     {
         http
                 .authorizeHttpRequests(auth -> auth
@@ -30,7 +34,8 @@ public class SecurityConfig
                 .formLogin(Customizer.withDefaults())
                 .headers(headers -> headers
                         .contentSecurityPolicy(csp -> csp
-                                .policyDirectives("default-src 'self'; frame-ancestors 'none'")));
+                                .policyDirectives("default-src 'self'; frame-ancestors 'none'")))
+                .addFilterBefore(new LoginRateLimitFilter(loginAttempts), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

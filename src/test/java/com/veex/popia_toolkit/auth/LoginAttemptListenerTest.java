@@ -1,10 +1,5 @@
 package com.veex.popia_toolkit.auth;
 
-public class LoginAttemptListenerTest {
-    
-}
-package com.veex.popia_toolkit.auth;
-
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.BadCredentialsException;
