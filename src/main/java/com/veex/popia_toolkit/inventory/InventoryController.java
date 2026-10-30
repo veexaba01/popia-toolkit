@@ -71,4 +71,22 @@ public class InventoryController
         model.addAttribute("heading", heading);
         model.addAttribute("action", action);
     }
+
+    @PostMapping("/inventory/{id}")
+    public String update(@PathVariable UUID id,
+                         @Valid @ModelAttribute("form") InventoryItemForm form,
+                         BindingResult result,
+                         @AuthenticationPrincipal AppUserPrincipal principal,
+                         Model model)
+    {
+        if (result.hasErrors())
+        {
+            prepareForm(model, "Edit inventory item", "/inventory/" + id);
+            return "inventory/form";
+        }
+
+        inventoryService.update(principal.getOrganisationId(), id, form.toDetails());
+
+        return "redirect:/inventory?updated";
+    }
 }

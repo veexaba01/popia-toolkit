@@ -119,4 +119,37 @@ public class InventoryControllerTest
         assertEquals("Patient contacts", form.getName());
         assertEquals("/inventory/" + itemId, model.getAttribute("action"));
     }
+
+    @Test void updatesTheItemInTheOrganisationOfTheLoggedInUser()
+    {
+        // Arrange
+        UUID itemId = UUID.randomUUID();
+        InventoryItemForm form = validForm();
+        BindingResult result = new BeanPropertyBindingResult(form, "form");
+
+        // Act
+        String view = controller.update(itemId, form, result, staffPrincipal(), new ExtendedModelMap());
+
+        // Assert
+        assertEquals("redirect:/inventory?updated", view);
+        verify(service).update(organisationId, itemId, form.toDetails());
+    }
+
+    @Test void returnsTheEditFormWithoutUpdatingWhenValidationFails()
+    {
+        // Arrange
+        UUID itemId = UUID.randomUUID();
+        InventoryItemForm form = validForm();
+        BindingResult result = new BeanPropertyBindingResult(form, "form");
+        result.rejectValue("name", "blank", "Name is required");
+        Model model = new ExtendedModelMap();
+
+        // Act
+        String view = controller.update(itemId, form, result, staffPrincipal(), model);
+
+        // Assert
+        assertEquals("inventory/form", view);
+        assertEquals("/inventory/" + itemId, model.getAttribute("action"));
+        verify(service, never()).update(any(UUID.class), any(UUID.class), any(InventoryItemDetails.class));
+    }
 }

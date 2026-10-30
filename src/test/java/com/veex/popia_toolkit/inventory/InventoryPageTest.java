@@ -14,12 +14,14 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @SpringBootTest
 @Transactional
@@ -95,5 +97,28 @@ public class InventoryPageTest
     {
         mockMvc.perform(get("/inventory/" + itemB.getId() + "/edit").with(user(staffOf(clinicA))))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test void ownerCanUpdateTheirItem() throws Exception
+    {
+        mockMvc.perform(post("/inventory/" + itemA.getId()).with(user(staffOf(clinicA))).with(csrf())
+                        .param("name", "Patient records")
+                        .param("purpose", "Treatment")
+                        .param("storageLocation", "Locked cabinet"))
+                .andExpect(status().is3xxRedirection());
+
+        assertEquals("Patient records", service.get(clinicA.getId(), itemA.getId()).getName());
+    }
+
+    @Test void cannotUpdateAnotherOrganisationsItem() throws Exception
+    {
+        mockMvc.perform(post("/inventory/" + itemB.getId()).with(user(staffOf(clinicA))).with(csrf())
+                        .param("name", "Hacked")
+                        .param("purpose", "Hacked")
+                        .param("storageLocation", "Hacked"))
+                .andExpect(status().isNotFound());
+
+        assertEquals("Learner records", service.get(clinicB.getId(), itemB.getId()).getName(),
+                "The other organisation's item must be unchanged");
     }
 }
