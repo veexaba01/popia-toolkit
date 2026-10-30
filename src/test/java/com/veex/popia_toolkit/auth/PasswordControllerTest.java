@@ -1,19 +1,18 @@
 package com.veex.popia_toolkit.auth;
 
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-
-import java.util.UUID;
-import org.springframework.validation.BeanPropertyBindingResult;
-import org.springframework.validation.BindingResult;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -93,5 +92,38 @@ public class PasswordControllerTest
         // Assert
         assertEquals("account/password", view);
         assertTrue(result.hasFieldErrors("currentPassword"), "The error belongs on the current password field");
+    }
+
+    @Test void rejectsNewPasswordsThatDoNotMatch()
+    {
+        // Arrange
+        ChangePasswordForm form = validForm();
+        form.setConfirmPassword("something-else-9999");
+        BindingResult result = new BeanPropertyBindingResult(form, "form");
+
+        // Act
+        String view = controller.change(form, result, principal());
+
+        // Assert
+        assertEquals("account/password", view);
+        assertTrue(result.hasFieldErrors("confirmPassword"), "The mismatch belongs on the confirmation field");
+        verify(service, never()).changePassword(any(UUID.class), anyString(), anyString());
+    }
+
+    @Test void rejectsANewPasswordThatIsTheSameAsTheCurrentOne()
+    {
+        // Arrange
+        ChangePasswordForm form = validForm();
+        form.setNewPassword("old-password-1234");
+        form.setConfirmPassword("old-password-1234");
+        BindingResult result = new BeanPropertyBindingResult(form, "form");
+
+        // Act
+        String view = controller.change(form, result, principal());
+
+        // Assert
+        assertEquals("account/password", view);
+        assertTrue(result.hasFieldErrors("newPassword"), "The error belongs on the new password field");
+        verify(service, never()).changePassword(any(UUID.class), anyString(), anyString());
     }
 }

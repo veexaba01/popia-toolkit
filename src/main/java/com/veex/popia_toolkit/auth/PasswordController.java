@@ -1,12 +1,11 @@
 package com.veex.popia_toolkit.auth;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-
 import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
@@ -32,6 +31,18 @@ public class PasswordController
                          BindingResult result,
                          @AuthenticationPrincipal AppUserPrincipal principal)
     {
+        if (!result.hasErrors())
+        {
+            if (!form.getNewPassword().equals(form.getConfirmPassword()))
+            {
+                result.rejectValue("confirmPassword", "mismatch", "The two new passwords do not match.");
+            }
+            else if (form.getNewPassword().equals(form.getCurrentPassword()))
+            {
+                result.rejectValue("newPassword", "same", "The new password must be different from the current one.");
+            }
+        }
+
         if (result.hasErrors())
         {
             return "account/password";
