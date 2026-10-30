@@ -52,4 +52,9 @@ public class AppUser
     public Role getRole() {return role;}
     public boolean isEnabled() {return enabled;}
 
+    public void changePasswordHash(String newPasswordHash)
+    {
+        this.passwordHash = newPasswordHash;
+    }
+
 }
