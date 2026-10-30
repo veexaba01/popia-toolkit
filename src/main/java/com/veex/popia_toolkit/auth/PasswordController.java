@@ -4,6 +4,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import jakarta.validation.Valid;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+
 @Controller
 public class PasswordController
 {
@@ -19,5 +25,29 @@ public class PasswordController
     {
         model.addAttribute("form", new ChangePasswordForm());
         return "account/password";
+    }
+
+    @PostMapping("/account/password")
+    public String change(@Valid @ModelAttribute("form") ChangePasswordForm form,
+                         BindingResult result,
+                         @AuthenticationPrincipal AppUserPrincipal principal)
+    {
+        if (result.hasErrors())
+        {
+            return "account/password";
+        }
+
+        try
+        {
+            passwordChangeService.changePassword(principal.getUserId(), form.getCurrentPassword(),
+                    form.getNewPassword());
+        }
+        catch (InvalidCurrentPasswordException e)
+        {
+            result.rejectValue("currentPassword", "wrong", "The current password is not correct.");
+            return "account/password";
+        }
+
+        return "redirect:/account/password?changed";
     }
 }
