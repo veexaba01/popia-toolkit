@@ -37,6 +37,8 @@ public class InventoryPageTest
     private MockMvc mockMvc;
     private Organisation clinicA;
     private Organisation clinicB;
+    private InventoryItem itemA;
+    private InventoryItem itemB;
 
     @BeforeEach
     void setUp()
@@ -44,8 +46,8 @@ public class InventoryPageTest
         mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
         clinicA = organisations.save(new Organisation("Clinic A"));
         clinicB = organisations.save(new Organisation("Clinic B"));
-        service.create(clinicA.getId(), new InventoryItemDetails("Patient contacts", "Booking", "Software", false));
-        service.create(clinicB.getId(), new InventoryItemDetails("Learner records", "Admissions", "Cabinet", false));
+        itemA = service.create(clinicA.getId(), new InventoryItemDetails("Patient contacts", "Booking", "Software", false));
+        itemB = service.create(clinicB.getId(), new InventoryItemDetails("Learner records", "Admissions", "Cabinet", false));
     }
 
     private AppUserPrincipal staffOf(Organisation organisation)
@@ -71,9 +73,15 @@ public class InventoryPageTest
         assertFalse(page.contains("Learner records"), "Clinic B's item must never appear for clinic A");
     }
 
-        @Test void userCanOpenTheAddForm() throws Exception
+    @Test void userCanOpenTheAddForm() throws Exception
     {
         mockMvc.perform(get("/inventory/new").with(user(staffOf(clinicA))))
+                .andExpect(status().isOk());
+    }
+
+    @Test void ownerCanOpenTheEditPage() throws Exception
+    {
+        mockMvc.perform(get("/inventory/" + itemA.getId() + "/edit").with(user(staffOf(clinicA))))
                 .andExpect(status().isOk());
     }
 }

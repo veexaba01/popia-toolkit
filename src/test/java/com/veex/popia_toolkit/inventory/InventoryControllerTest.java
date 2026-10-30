@@ -8,17 +8,16 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class InventoryControllerTest
 {
@@ -29,6 +28,16 @@ public class InventoryControllerTest
     private AppUserPrincipal staffPrincipal()
     {
         return new AppUserPrincipal(UUID.randomUUID(), organisationId, "staff@example.com", "hash", Role.STAFF, true);
+    }
+
+    private InventoryItemForm validForm()
+    {
+        InventoryItemForm form = new InventoryItemForm();
+        form.setName("Patient contacts");
+        form.setPurpose("Booking appointments");
+        form.setStorageLocation("Practice software");
+        form.setSpecialInformation(false);
+        return form;
     }
 
     @Test void listShowsTheItemsOfTheLoggedInUsersOrganisation()
@@ -61,16 +70,6 @@ public class InventoryControllerTest
         assertEquals("/inventory", model.getAttribute("action"), "The form should post to the collection");
     }
 
-    private InventoryItemForm validForm()
-    {
-        InventoryItemForm form = new InventoryItemForm();
-        form.setName("Patient contacts");
-        form.setPurpose("Booking appointments");
-        form.setStorageLocation("Practice software");
-        form.setSpecialInformation(false);
-        return form;
-    }
-
     @Test void createsTheItemInTheOrganisationOfTheLoggedInUser()
     {
         // Arrange
@@ -100,5 +99,24 @@ public class InventoryControllerTest
         assertEquals("inventory/form", view, "The form should be shown again with its errors");
         assertEquals("/inventory", model.getAttribute("action"), "The form must still post to the right place");
         verify(service, never()).create(any(UUID.class), any(InventoryItemDetails.class));
+    }
+
+    @Test void showEditFormFillsTheFormFromTheItemOfTheUsersOrganisation()
+    {
+        // Arrange
+        UUID itemId = UUID.randomUUID();
+        InventoryItem item = new InventoryItem(new Organisation("Clinic A"), "Patient contacts",
+                "Booking appointments", "Practice software", true);
+        when(service.get(organisationId, itemId)).thenReturn(item);
+        Model model = new ExtendedModelMap();
+
+        // Act
+        String view = controller.showEditForm(itemId, staffPrincipal(), model);
+
+        // Assert
+        assertEquals("inventory/form", view);
+        InventoryItemForm form = (InventoryItemForm) model.getAttribute("form");
+        assertEquals("Patient contacts", form.getName());
+        assertEquals("/inventory/" + itemId, model.getAttribute("action"));
     }
 }
