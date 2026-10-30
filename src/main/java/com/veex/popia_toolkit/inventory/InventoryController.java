@@ -89,4 +89,12 @@ public class InventoryController
 
         return "redirect:/inventory?updated";
     }
+
+    @PostMapping("/inventory/{id}/delete")
+    public String delete(@PathVariable UUID id, @AuthenticationPrincipal AppUserPrincipal principal)
+    {
+        inventoryService.delete(principal.getOrganisationId(), id);
+
+        return "redirect:/inventory?deleted";
+    }
 }

@@ -152,4 +152,17 @@ public class InventoryControllerTest
         assertEquals("/inventory/" + itemId, model.getAttribute("action"));
         verify(service, never()).update(any(UUID.class), any(UUID.class), any(InventoryItemDetails.class));
     }
+
+    @Test void deletesTheItemInTheOrganisationOfTheLoggedInUser()
+    {
+        // Arrange
+        UUID itemId = UUID.randomUUID();
+
+        // Act
+        String view = controller.delete(itemId, staffPrincipal());
+
+        // Assert
+        assertEquals("redirect:/inventory?deleted", view);
+        verify(service).delete(organisationId, itemId);
+    }
 }

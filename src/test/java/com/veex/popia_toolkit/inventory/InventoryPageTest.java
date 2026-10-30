@@ -121,4 +121,34 @@ public class InventoryPageTest
         assertEquals("Learner records", service.get(clinicB.getId(), itemB.getId()).getName(),
                 "The other organisation's item must be unchanged");
     }
+
+    private AppUserPrincipal adminOf(Organisation organisation)
+    {
+        return new AppUserPrincipal(UUID.randomUUID(), organisation.getId(), "owner@example.com",
+                "hash", Role.ADMIN, true);
+    }
+
+    @Test void staffCannotDeleteAnItem() throws Exception
+    {
+        mockMvc.perform(post("/inventory/" + itemA.getId() + "/delete").with(user(staffOf(clinicA))).with(csrf()))
+                .andExpect(status().isForbidden());
+
+        assertNotNull(service.get(clinicA.getId(), itemA.getId()), "The item must still exist");
+    }
+
+    @Test void adminCanDeleteTheirOrganisationsItem() throws Exception
+    {
+        mockMvc.perform(post("/inventory/" + itemA.getId() + "/delete").with(user(adminOf(clinicA))).with(csrf()))
+                .andExpect(status().is3xxRedirection());
+
+        assertThrows(InventoryItemNotFoundException.class, () -> service.get(clinicA.getId(), itemA.getId()));
+    }
+
+    @Test void adminCannotDeleteAnotherOrganisationsItem() throws Exception
+    {
+        mockMvc.perform(post("/inventory/" + itemB.getId() + "/delete").with(user(adminOf(clinicA))).with(csrf()))
+                .andExpect(status().isNotFound());
+
+        assertNotNull(service.get(clinicB.getId(), itemB.getId()), "The other organisation's item must remain");
+    }
 }
